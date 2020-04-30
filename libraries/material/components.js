@@ -1012,10 +1012,10 @@ prx.types.material_tabbar_segmented_button = {
 
 			cR += '<style>';
 			if( elm.imgSrc.fileId != '' ) {
-				cR += '#' + _id + '-tabs-'+i+' .material-tabbar-button-list-item-icon { width: '+dims.height+'px; height: '+dims.height+'px; background-image: url('+prx.componentsHelper.getProp(elm.imgSrc,'asset')+'); background-size: '+(prx.componentsHelper.getProp(item.iconSize,'icon-size')*20)+'% auto; -webkit-mask-size: '+(prx.componentsHelper.getProp(item.iconSize,'icon-size')*20)+'% auto; }';
+				cR += '#' + _id + '-tabs-'+i+' .material-tabbar-button-list-item-icon { width: '+dims.height+'px; height: '+dims.height+'px; background-image: url('+prx.componentsHelper.getProp(elm.imgSrc,'asset')+'); background-size: '+(prx.componentsHelper.getProp(item.iconSize,'icon-size')*20)+'% auto; -webkit-mask-size: '+(prx.componentsHelper.getProp(item.iconSize,'icon-size')*20)+'% auto; mask-size: '+(prx.componentsHelper.getProp(item.iconSize,'icon-size')*20)+'% auto;}';
 				// if( $.browser.webkit ) {
                     var assetPathWithMaskEnabled = prx.componentsHelper.maskImageFixForSafari11(elm.imgSrc);
-					cR += '#' + _id + '-tabs-'+i+' .material-tabbar-button-list-item-input:checked + label .material-tabbar-button-list-item-icon { background-image: none; -webkit-mask-image: url('+assetPathWithMaskEnabled+'); background-color: '+prx.componentsHelper.getProp(item.iconColorActive,'color-background')+'; }';
+					cR += '#' + _id + '-tabs-'+i+' .material-tabbar-button-list-item-input:checked + label .material-tabbar-button-list-item-icon { background-image: none; -webkit-mask-image: url('+assetPathWithMaskEnabled+'); mask-image: url('+assetPathWithMaskEnabled+'); background-color: '+prx.componentsHelper.getProp(item.iconColorActive,'color-background')+'; }';
 				// }
 			}
 			cR += '</style>';
@@ -2217,7 +2217,7 @@ prx.types.material_textfield = {
 			cR += '#' + _id + ' .material-textfield-icon { background-image: url('+prx.componentsHelper.getProp(item.imgSrc,'asset')+'); }';
 			// if( $.browser.webkit ) {
             	var assetPathWithMaskEnabled = prx.componentsHelper.maskImageFixForSafari11(item.imgSrc);
-				cR += '#' + _id + ' .material-textfield-icon.checked { background-image: none; -webkit-mask-image: url('+assetPathWithMaskEnabled+'); background-color: '+prx.componentsHelper.getProp(item.borderColorActive,'color-background')+'; }';
+				cR += '#' + _id + ' .material-textfield-icon.checked { background-image: none; -webkit-mask-image: url('+assetPathWithMaskEnabled+'); mask-image: url('+assetPathWithMaskEnabled+') background-color: '+prx.componentsHelper.getProp(item.borderColorActive,'color-background')+'; }';
 			//}
 		}
 		cR += '</style>';

@@ -42,10 +42,10 @@ prx.types.basic_buttongroup = {
         if(item.maskEnabled) {
             cR += '#'+_id+' .icon {background-color: '+prx.componentsHelper.getProp(item.maskInactive,'color-background')+'; -webkit-mask-size: auto '+(item.iconSize*20)+'%; mask-size: auto '+(item.iconSize*20)+'%; }';
             if (item.iconpos !== 'top'){
-                cR += '#'+_id+' .icon { -webkit-mask-size: auto 100%;}';
+                cR += '#'+_id+' .icon { -webkit-mask-size: auto 100%; mask-size: auto 100%;}';
             }
             else {
-                cR += '#'+_id+' .icon {-webkit-mask-size: auto '+(item.iconSize*20)+'%;}';
+                cR += '#'+_id+' .icon {-webkit-mask-size: auto '+(item.iconSize*20)+'%; mask-size: auto '+(item.iconSize*20)+'%;}';
             }
             cR += '#'+_id+' input:checked + label .icon { background-color: '+prx.componentsHelper.getProp(item.maskActive,'color-background')+' }';
         }
