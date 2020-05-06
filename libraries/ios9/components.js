@@ -1011,7 +1011,7 @@ prx.types.ios7_segmentedcontrol = {
                             property: 'border-width',
                             transitionable: true
                         },
-                        hiddenByDefault: function() {
+                        hiddenByDefault: function(item) {
                             return item.ios13 === true;
                         }
                     }
@@ -1033,7 +1033,7 @@ prx.types.ios7_segmentedcontrol = {
                                 $('#' + _id).append('<style>#'+_id+' .ios7-segmentedcontrol-button input:not(:checked) + label .label-separator { border-color: '+prx.componentsHelper.getProp(item.borderColor,'color-border')+'; } </style>')
                             }
                         },
-                        hiddenByDefault: function() {
+                        hiddenByDefault: function(item) {
                             return item.ios13 !== true;
                         }
                     }
@@ -2172,7 +2172,7 @@ prx.types.ios7_switch = {
                             caption: 'Active border color',
                             rerender: true
                         },
-                        hiddenByDefault: function() {
+                        hiddenByDefault: function(item) {
                             return item.name == 'ios10_switch';
                         }
                     }

@@ -2654,12 +2654,14 @@ prx.types.rectangle = {
         cR += '<style>';
         cR += prx.items.getComponentBaseStyle(item, containerid, symbol);
         cR += '#'+_id+' .inner-rec { ' +prx.gradients.getBgCssByProperty(item.backgroundColor,'color-background')+'; border-width: '+prx.componentsHelper.getProp(item.borderWidth,'border-width')+'; border-style: '+prx.componentsHelper.getProp(item.borderStyle,'border-type')+'; border-color: ' + prx.componentsHelper.getProp(item.borderColor,'color-border') + '; border-radius: '+prx.componentsHelper.getProp(item.borderRadius,'border-radius')+'; } ';
-        cR += '#' + _id + ' .shapes-text-container { ' + _props + ' ' + prx.componentsHelper.getProp(item.textFont + '|' + item.textFontStyle,'font-family') + prx.componentsHelper.getProp(item.textFontStyle,'font-style') + '; font-size: ' + prx.componentsHelper.getProp(item.textSize, 'num-text-size') + 'px; text-align: ' + prx.componentsHelper.getProp(item.textAlign, 'align') + '; line-height: ' + prx.componentsHelper.getProp(item.lineHeight, 'num-text-size') + 'px; letter-spacing: ' + prx.componentsHelper.getProp(item.textSpacing, 'num-text-size') + 'px; color: ' + prx.componentsHelper.getProp(item.textColor, 'color-text') + '; }';
+        cR += '#' + _id + ' .shapes-text-container { ' + _props + ' ' + prx.componentsHelper.getProp(item.textFont + '|' + item.textFontStyle,'font-family') + prx.componentsHelper.getProp(item.textFontStyle,'font-style') + '; font-size: ' + prx.componentsHelper.getProp(item.textSize, 'num-text-size') + 'px; text-align: ' + prx.componentsHelper.getProp(item.textAlign, 'align') + '; line-height: ' + prx.componentsHelper.getProp(item.lineHeight, 'num-text-size') + 'px; letter-spacing: ' + prx.componentsHelper.getProp(item.textSpacing, 'num-text-size') + 'px; color: ' + prx.componentsHelper.getProp(item.textColor, 'color-text') + '; position: absolute; } ';
+        cR += '#' + _id + ' .shapes-image-background { ' + ((prx.componentsHelper.getProp(item.imgSrc,'asset') !== '') ?('background-image: url(' + prx.componentsHelper.getProp(item.imgSrc,'asset')+'); background-size: ' + ((prx.componentsHelper.getProp(item.backgroundSizeType,'text') == 'cover') ? (prx.componentsHelper.getProp(item.backgroundSizeType,'text') + ';') : (prx.componentsHelper.getProp(item.backgroundSizeValue,'num-percentage') + '% auto;'))) : '') + ' }';
 
         //cR += '#' + _id + ' .rectangle-text-container span{display:block;}';
         cR += '</style>';
         cR += prx.items.getComponentPrependDivs(item, containerid, symbol);
         cR += '<div id="rec-' + _id + '" class="inner-rec liveUpdate-backgroundColor-background-color changeProperty-backgroundColor changeProperty-backgroundColor-background-color changeProperty-borderColor changeProperty-borderWidth changeProperty-borderColor-border-color liveUpdate-borderColor-border-color">';
+        cR += '<div class="shapes-image-background"></div>';
         cR += '<div class="shapes-text-container liveUpdate-textColor-color changeProperty-textFontStyle">';
         cR += '<span data-editableproperty="text">' + prx.componentsHelper.getProp(item.text,'text-textarea') + '</span>';
         cR += '</div>';
@@ -2767,8 +2769,8 @@ prx.types.rectangle = {
 		      					return item.borderRadius;
 		      				},
 		      				values: {min: 0, max: 20, step: 1},
-                    expandableType: 'borderRadius',
-                    expandedValues: ['tl', 'tr', 'bl', 'br'],
+                            expandableType: 'borderRadius',
+                            expandedValues: ['tl', 'tr', 'bl', 'br'],
 	      					changeProperty: {
 	      						caption: 'Border Radius',
 	      						selector: '.inner-rec',
@@ -2933,6 +2935,108 @@ prx.types.rectangle = {
                             transitionable: true
                         },
                     },
+                ]
+            ]
+        },
+        {
+            caption: 'Image',
+            properties: [
+                [
+                    {
+                        caption: false
+                        ,name: 'imgSrc'
+                        ,type: 'combo-asset'
+                        ,displayValue: function(item,name) {
+                            if((item.imgSrc == undefined ) || (item.imgSrc.fileId == '')) {
+                                return 'No asset selected.';
+                            }
+                            return prx.utils.escapeHTML(item.imgSrc.name);
+                        }
+                        ,value: function(item,name) {
+                            return JSON.stringify({
+                                allow: 'image',
+                                asset: (item.imgSrc !== undefined) ? item.imgSrc : {fileId: '', name: '', assetType: ''}
+                            });
+                        },
+                        onChange: function(item) {
+                            if (item.imgSrc.name.toLowerCase().endsWith('.svg')) {
+                                item.backgroundSizeType = 'percentage';
+                            } else {
+                                item.backgroundSizeType = 'cover';
+                            }
+
+                            return item;
+                        }
+                        ,changeProperty: {
+                            caption: 'Image',
+                            rerender: true
+                        }
+
+                    }
+                ],
+                [
+                    {
+                        caption: 'Size',
+                        name: 'backgroundSizeType',
+                        proptype: 'background-size-type',
+                        type: 'select',
+                        value: function(item,name) {
+                            if(typeof(item.backgroundSizeType) == 'undefined') { item.backgroundSizeType = 'cover'; }
+                            return item.backgroundSizeType;
+                        },
+                        hiddenByDefault: function(item){
+                            return ((item.imgSrc == undefined) || (item.imgSrc.fileId === ''));
+                        },
+                        onChange: function(item) {
+                            return item;
+                        },
+                        values: [{ value: 'cover', displayValue: 'Cover'}, { value: 'percentage', displayValue: 'Percentage' }],
+                        changeProperty: {
+                            caption: 'Background Size Type',
+                            transitionable: false,
+                            changeFunction: function (item, containerid, duration, easing, dynPropI) {
+                                if(prx.componentsHelper.getProp(item.imgSrc,'asset') !== '') {
+                                    if(item.backgroundSizeType === 'cover') {
+                                        $('#rec-' + containerid + '-' + item.id + ' .shapes-image-background').css('background-size', 'cover');
+                                    }
+                                    else {
+                                        $('#rec-' + containerid + '-' + item.id + ' .shapes-image-background').css('background-size', item.backgroundSizeValue + '% auto');
+                                    }
+                                }
+                            },
+                            changeable: false
+                        }
+                    },
+                    {
+                        caption: false,
+                        name: 'backgroundSizeValue',
+                        proptype: 'num-percentage',
+                        type: 'slider-input',
+                        value: function(item,name) {
+                            if(typeof(item.backgroundSizeValue) == 'undefined') { item.backgroundSizeValue = 35; }
+                            return item.backgroundSizeValue; },
+                        hiddenByDefault: function(item){
+                            if(item.backgroundSizeType === 'percentage') {
+                                return ((item.imgSrc == undefined) || (item.imgSrc.fileId === ''));
+                            }
+                            return true;
+                        },
+                        values: { min: 0, max: 100, step: 1 } ,
+                        changeProperty: {
+                            caption: 'Background Size',
+                            changeFunction: function (item, containerid, duration, easing, dynPropI) {
+                                if(prx.componentsHelper.getProp(item.imgSrc,'asset') !== '') {
+                                    if(item.backgroundSizeType === 'cover') {
+                                        $('#rec-' + containerid + '-' + item.id + ' .shapes-image-background').css('background-size', 'cover');
+                                    }
+                                    else {
+                                        $('#rec-' + containerid + '-' + item.id + ' .shapes-image-background').css('background-size', item.backgroundSizeValue + '% auto');
+                                    }
+                                }
+                            },
+                            transitionable: false
+                        }
+                    }
                 ]
             ]
         }
@@ -4517,6 +4621,7 @@ prx.types.video = {
 
         if(typeof(item.vimeoid)=='undefined') { item.vimeoid = ''; }
         if(typeof(item.loop)=='undefined') { item.loop = false; }
+        if(typeof(item.mute)=='undefined') { item.mute = false; }
 
         var cR = '';
         cR += '<div id="' + _id + '" ' + prx.items.getComponentBaseAttributes(item, containerid, symbol)  + ' class="' + prx.items.getComponentBaseClasses(item, containerid, symbol) + ' box pos type-video '+prx.componentsHelper.getProp(item.videoType,'other')+'">';
@@ -4526,7 +4631,7 @@ prx.types.video = {
         cR += prx.items.getComponentPrependDivs(item, containerid, symbol);
         switch(prx.componentsHelper.getProp(item.videoType,'other')) {
         case 'html5':
-            cR += '<video id="'+_id+'-html5video" class="html5" width="100%" height="100%" '+ ((prx.componentsHelper.getProp(item.controls,'boolean')) ? 'controls' : '') + ((prx.componentsHelper.getProp(item.placeholder.fileId,'other') != '') ? ' poster='+prx.componentsHelper.getProp(item.placeholder,'asset') : '' )+' '+ ((!prx.componentsHelper.getProp(item.preload,'boolean') && !(prx.editor && prx.componentsHelper.getProp(item.autoplay,'boolean'))) ? 'preload="none"' : '') +' '+ ((prx.componentsHelper.getProp(item.autoplay,'boolean') && !prx.editor) ? 'autoplay' : '') +' '+((prx.componentsHelper.getProp(item.loop,'boolean')) ? 'loop' : '')+' webkit-playsinline="true" playsinline="true" controlsList="nodownload">';
+            cR += '<video id="'+_id+'-html5video" class="html5" width="100%" height="100%" '+ ((prx.componentsHelper.getProp(item.controls,'boolean')) ? 'controls' : '') + ' ' + ((prx.componentsHelper.getProp(item.mute,'boolean')) ? 'muted' : '') + ((prx.componentsHelper.getProp(item.placeholder.fileId,'other') != '') ? ' poster='+prx.componentsHelper.getProp(item.placeholder,'asset') : '' )+' '+ ((!prx.componentsHelper.getProp(item.preload,'boolean') && !(prx.editor && prx.componentsHelper.getProp(item.autoplay,'boolean'))) ? 'preload="none"' : '') +' '+ ((prx.componentsHelper.getProp(item.autoplay,'boolean') && !prx.editor) ? 'autoplay' : '') +' '+((prx.componentsHelper.getProp(item.loop,'boolean')) ? 'loop' : '')+' webkit-playsinline="true" playsinline="true" controlsList="nodownload">';
             if(prx.componentsHelper.getProp(item.videoFileMP4.fileId,'other') != '') cR += '<source src="'+prx.componentsHelper.getProp(item.videoFileMP4,'asset')+'" type="video/mp4" />';
             if(prx.componentsHelper.getProp(item.videoFileWEBM.fileId,'other') != '') cR += '<source src="'+prx.componentsHelper.getProp(item.videoFileWEBM,'asset')+'" type="video/webm" />';
             if(prx.componentsHelper.getProp(item.videoFileOGG.fileId,'other') != '') cR += '<source src="'+prx.componentsHelper.getProp(item.videoFileOGG,'asset')+'" type="video/ogg" />';
@@ -4537,16 +4642,16 @@ prx.types.video = {
             if(prx.editor && $.browser.chrome) {
                 cR += '<object width="100%" height="100%"><param name="movie" value="//www.youtube.com/v/'+prx.componentsHelper.getProp(item.youtubeid,'other')+'?version=3&amp;hl=en_GB"></param><param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param><embed src="//www.youtube.com/v/'+prx.componentsHelper.getProp(item.youtubeid,'other')+'?version=3&amp;hl=en_GB" type="application/x-shockwave-flash" width="100%" height="100%" allowscriptaccess="always" allowfullscreen="true"></embed></object>';
             } else {
-                cR += '<iframe id="'+_id+'-youtube"   width="100%" height="100%" src="https://www.youtube.com/embed/'+prx.componentsHelper.getProp(item.youtubeid,'other')+'?enablejsapi=1&html5=1&wmode=transparent&playsinline=1'+((prx.componentsHelper.getProp(item.autoplay,'boolean') && !prx.editor) ? '&autoplay=1' : '')+((prx.componentsHelper.getProp(item.loop,'boolean') && !prx.editor) ? '&loop=1&playlist='+prx.componentsHelper.getProp(item.youtubeid,'other') : '')+((!prx.componentsHelper.getProp(item.controls,'boolean')) ? '&controls=0' : '')+'" frameborder="0"  webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>';
+                cR += '<iframe id="'+_id+'-youtube"   width="100%" height="100%" src="https://www.youtube.com/embed/'+prx.componentsHelper.getProp(item.youtubeid,'other')+'?enablejsapi=1&html5=1&wmode=transparent&playsinline=1'+((prx.componentsHelper.getProp(item.autoplay,'boolean') && !prx.editor) ? '&autoplay=1' : '')+((prx.componentsHelper.getProp(item.loop,'boolean') && !prx.editor) ? '&loop=1&playlist='+prx.componentsHelper.getProp(item.youtubeid,'other') : '')+((!prx.componentsHelper.getProp(item.controls,'boolean')) ? '&controls=0' : '')+'" frameborder="0"  webkitAllowFullScreen mozallowfullscreen allowFullScreen allow="autoplay; fullscreen"></iframe>';
             }
             break;
         case 'vimeo':
             item.vimeoid = prx.componentsHelper.getProp(item.vimeoid,'video-url');
-            if(prx.editor && ($.browser.chrome || prx.phantomjs)) {
-                cR += '<object width="100%" height="100%"><param name="allowfullscreen" value="true" /><param name="allowscriptaccess" value="always" /><param name="movie" value="https://vimeo.com/moogaloop.swf?clip_id='+prx.componentsHelper.getProp(item.vimeoid,'other')+'&amp;force_embed=1&amp;server=vimeo.com&amp;show_title=1&amp;show_byline=1&amp;show_portrait=1&amp;color=00adef&amp;fullscreen=1&amp;autoplay=0&amp;loop=0" /><embed src="https://vimeo.com/moogaloop.swf?clip_id='+prx.componentsHelper.getProp(item.vimeoid,'other')+'&amp;force_embed=1&amp;server=vimeo.com&amp;show_title=1&amp;show_byline=1&amp;show_portrait=1&amp;color=00adef&amp;fullscreen=1&amp;autoplay=0&amp;loop=0" type="application/x-shockwave-flash" allowfullscreen="true" allowscriptaccess="always" width="100%" height="100%"></embed></object>';
-            } else {
-                cR += '<iframe id="'+_id+'-vimeo"  width="100%" height="100%" src="https://player.vimeo.com/video/'+prx.componentsHelper.getProp(item.vimeoid,'other')+'?api=1&amp;player_id='+_id+'-vimeo&amp;title=0&amp;byline=0&amp;portrait=0&wmode=transparent'+((prx.componentsHelper.getProp(item.autoplay,'boolean') && !prx.editor) ? '&autoplay=1' : '')+((prx.componentsHelper.getProp(item.loop,'boolean') && !prx.editor) ? '&loop=1' : '')+'" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>';
-            }
+            //if(prx.editor && ($.browser.chrome || prx.phantomjs)) {
+            //    cR += '<object width="100%" height="100%"><param name="allowfullscreen" value="true" /><param name="allowscriptaccess" value="always" /><param name="movie" value="https://vimeo.com/moogaloop.swf?clip_id='+prx.componentsHelper.getProp(item.vimeoid,'other')+'&amp;force_embed=1&amp;server=vimeo.com&amp;show_title=1&amp;show_byline=1&amp;show_portrait=1&amp;color=00adef&amp;fullscreen=1&amp;autoplay=0&amp;loop=0" '+ ((prx.componentsHelper.getProp(item.mute,'boolean')) ? '&amp;muted=1' : '') + '/><embed src="https://vimeo.com/moogaloop.swf?clip_id='+prx.componentsHelper.getProp(item.vimeoid,'other')+'&amp;force_embed=1&amp;server=vimeo.com&amp;show_title=1&amp;show_byline=1&amp;show_portrait=1&amp;color=00adef&amp;fullscreen=1&amp;autoplay=0&amp;loop=0"'+ ((prx.componentsHelper.getProp(item.mute,'boolean')) ? '&amp;muted=1' : '') + ' type="application/x-shockwave-flash" allowfullscreen="true" allowscriptaccess="always" width="100%" height="100%"></embed></object>';
+            //} else {
+                cR += '<iframe id="'+_id+'-vimeo"  width="100%" height="100%" src="https://player.vimeo.com/video/'+prx.componentsHelper.getProp(item.vimeoid,'other')+'?api=1&amp;player_id='+_id+'-vimeo&amp;title=0&amp;byline=0&amp;portrait=0&wmode=transparent'+((prx.componentsHelper.getProp(item.autoplay,'boolean') && !prx.editor) ? '&autoplay=1' : '')+((prx.componentsHelper.getProp(item.loop,'boolean') && !prx.editor) ? '&loop=1' : '') + ((prx.componentsHelper.getProp(item.mute,'boolean')) ? '&muted=1' : '') +'" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen allow="autoplay; fullscreen"></iframe>';
+            //}
             break;
         }
         cR += prx.items.getComponentAppendDivs(item, containerid, symbol);
@@ -4567,7 +4672,7 @@ prx.types.video = {
 
             /* special events for youtube video in createVideo function */
             if(item.videoType=='youtube'){
-                prx.youtube.createVideo(_id);
+                prx.youtube.createVideo(_id, item.mute);
             }
 
             /* special events for vimeo video in createVideo function */
@@ -4867,7 +4972,20 @@ prx.types.video = {
                     	caption: 'Display controls',
                         rerender: true
                     }
-			    }]
+			    },
+                {
+                    caption: 'Mute audio'
+                    ,name: 'mute'
+                    ,type: 'onoff'
+                    ,value: function(item,name){
+                        return item.mute;
+                    }
+                    //,help: 'Muting audio relaxes video playing restrictions'
+                    ,changeProperty: {
+                        caption: 'Mute audio',
+                        rerender: true
+                    }
+                }]
 			    ]
         }
     ]
@@ -7401,6 +7519,9 @@ prx.components.rectangle = {
     ,borderWidth: 0
     ,borderColor: 'D1D1D1'
     ,borderRadius: 0
+    ,imgSrc: {fileId: '', name: '', assetType: '', bucketsource: '', url: ''}
+    ,backgroundSizeType: 'cover'
+    ,backgroundSizeValue: 35
     ,width: 264*prx.componentsHelper.getScale(_library)
     ,height: 96*prx.componentsHelper.getScale(_library)
     ,lineHeight: parseInt(1.231*17*prx.componentsHelper.getScale(_library))
@@ -7443,6 +7564,9 @@ prx.components.circle = {
     ,textAlign: 'center'
     ,text: ''
     ,typeName: 'oval'
+    ,imgSrc: {fileId: '', name: '', assetType: '', bucketsource: '', url: ''}
+    ,backgroundSizeType: 'cover'
+    ,backgroundSizeValue: 35
 };
 
 //TYPE: SVG SHAPES
@@ -7717,6 +7841,7 @@ prx.components.video = {
     ,autoplay: false
     ,autoplayoff: true
     ,loop: false
+    ,mute: false
     ,placeholder: { fileId: '', assetType: '', name: '' }
     ,youtubeid: ''
     ,vimeoid: ''
